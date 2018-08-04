@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.wzz.actrowdfudingService.dao.MemberDao" >
+
+	<insert id="insertTicket">
+		insert into t_ticket (memberid,status,pstep,piid)
+		values (#{memberid},#{status},#{pstep},#{piid})
+	</insert>
+
+	<update id="updateAcctoutType">
+		update t_member
+		set accttype = #{accttype}
+		where id = #{id}
+	</update>
+
+	<update id="updateStep">
+		update t_ticket
+		set pstep = #{pstep}
+		where id = #{id}
+	</update>
+
+	<update id="updateStepAndAuthCode">
+		update t_member
+		set accttype = #{accttype}, authcode = #{authcode}
+		where id = #{id}
+	</update>
+
+	<update id="updateBasicinfo">
+		update t_member
+		set realname = #{realname}, cardnum = #{cardnum}, tel = #{tel}
+		where id = #{id}
+	</update>
+	
+	<select id="queryCertByAccountType" resultType="cn.wzz.actrowdfudingcommon.bean.Cert">
+		select * from t_cert 
+		where id in (
+			select certid from t_account_type_cert
+			where accttype = #{accttype}
+		)
+	</select>
+	
+	<insert id="insertMemberCerts">
+		insert into t_member_cert (
+			memberid,certid,iconpath
+		) values 
+		<foreach collection="mcs" separator="," item="mc">
+			(#{mc.memberid},#{mc.certid},#{mc.iconpath})
+		</foreach>
+	</insert>
+	
+	<select id="queryMemberByPiid" resultType="cn.wzz.actrowdfudingcommon.bean.Member">
+		select * from t_member 
+		where id = (
+			select memberid from t_ticket 
+			where piid = #{piid} 
+		)
+	</select>
+
+	<select id="queryMemberCertsByMemberid" resultType="cn.wzz.actrowdfudingcommon.bean.MemberCert">
+		select a.*,b.name as certname 
+		from t_member_cert a
+		join t_cert b 
+		on a.certid = b.id
+		where memberid = #{memberid} 
+	</select>
+</mapper>
